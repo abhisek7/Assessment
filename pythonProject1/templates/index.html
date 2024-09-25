@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Booking System</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        td { border: 1px solid #000; height: 50px; text-align: center; }
+        .available { background-color: lightgreen; }
+        .booked { background-color: lightcoral; }
+        .header { font-weight: bold; }
+        @media (max-width: 600px) {
+            td { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Train Coach Seat Booking</h1>
+    <div>
+        <input type="number" id="numSeats" placeholder="Number of seats" min="1" max="7" aria-label="Number of seats">
+        <button onclick="bookSeats()">Book Seats</button>
+        <p id="feedback" style="color: red;" aria-live="polite"></p>
+    </div>
+    <table>
+        <tbody id="seatTable">
+            {% for row in seats %}
+            <tr>
+                <td class="header">Row {{ row.row }}</td>
+                {% for seat in row.seats %}
+                <td class="{{ 'available' if seat == 0 else 'booked' }}">
+                    {{ 'Available' if seat == 0 else 'Booked' }}<br>
+                    <small>Seat {{ loop.index }}</small>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function bookSeats() {
+            const numSeats = parseInt(document.getElementById('numSeats').value);
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = ''; // Clear previous feedback
+
+            // Confirmation before booking
+            if (confirm(`Are you sure you want to book ${numSeats} seats?`)) {
+                fetch('/book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ num_seats: numSeats })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.length > 0) {
+                        feedback.style.color = 'green';
+                        feedback.textContent = "Booked seats: " + JSON.stringify(data);
+                        location.reload(); // Reload to update seat status
+                    } else {
+                        feedback.style.color = 'red';
+                        feedback.textContent = "No seats available";
+                    }
+                })
+                .catch(error => {
+                    feedback.style.color = 'red';
+                    feedback.textContent = "Error booking seats: " + error.message;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
