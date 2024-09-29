@@ -1,7 +1,6 @@
 /home/Abhi7/mysite/
 │
 ├── flask_app.py           # Main application file
-├── config.py              # Configuration file
 ├── seats.json             # JSON file for seat data
 │
 └── templates/             # Directory for HTML templates
