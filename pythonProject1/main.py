@@ -1,17 +1,25 @@
 from flask import Flask, request, jsonify, render_template
 import json
+import os
 
 app = Flask(__name__)
 
 # Load initial seat configuration
 def load_seats():
-    with open('seats.json', 'r') as f:
+    file_path = os.path.join(os.path.dirname(__file__), 'seats.json')
+    with open(file_path, 'r') as f:
         return json.load(f)
+
 
 # Save updated seat configuration
 def save_seats(coach):
-    with open('seats.json', 'w') as f:
-        json.dump(coach, f)
+    file_path = os.path.join(os.path.dirname(__file__), 'seats.json')
+    try:
+        with open(file_path, 'w') as f:
+            json.dump(coach, f)
+    except Exception as e:
+        print(f"Error saving seats: {e}")  # Log the error for debugging
+
 
 @app.route('/')
 def index():
@@ -61,5 +69,4 @@ def book_seats():
 
     return jsonify(booked_seats)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Remove app.run() for production
